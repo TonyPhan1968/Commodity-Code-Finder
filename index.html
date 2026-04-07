@@ -160,9 +160,10 @@
   }
 
   .field-hint {
-    margin-top: 4px;
-    font-size: 10px;
-    color: #aaa;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.7;
   }
 
   /* MULTI-SELECT CHIPS */
@@ -359,45 +360,34 @@
   .alert-info { background: #edf3f0; border: 1px solid #b5d0c0; color: #2d5a40; }
   .alert-error { background: #fdf0ee; border: 1px solid #e8c0b8; color: #7a2a1a; }
 
-  /* HISTORY */
-  .history-panel {
-    margin-top: 20px;
-    border: 1px solid var(--border);
-    background: white;
-    border-radius: 2px;
-  }
-  .history-header {
-    padding: 12px 16px;
-    background: var(--cream);
-    border-bottom: 1px solid var(--border);
+  /* MANUAL WARNING — Option C pulsing badge */
+  .manual-warning {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
     font-size: 10px;
-    letter-spacing: 0.12em;
+    font-weight: 500;
+    background: var(--rust);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #888;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    animation: pulse-red 1.5s ease-in-out infinite;
+    vertical-align: middle;
   }
-  .history-clear {
-    background: none; border: none; cursor: pointer;
-    font-family: var(--mono); font-size: 10px; color: var(--rust);
-    letter-spacing: 0.08em; text-transform: uppercase;
+  @keyframes pulse-red {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
   }
-  .history-item {
-    padding: 10px 16px;
-    border-bottom: 1px dotted var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    transition: background 0.1s;
+  /* Red border on the field itself */
+  .field-needs-manual select,
+  .field-needs-manual input {
+    border: 2px solid var(--rust) !important;
+    background: #fdf0ee !important;
   }
-  .history-item:last-child { border-bottom: none; }
-  .history-item:hover { background: var(--cream); }
-  .history-item .h-code { font-size: 13px; font-weight: 500; color: var(--gold); }
-  .history-item .h-desc { font-size: 10px; color: #aaa; margin-top: 2px; }
-  .history-item .h-duty { font-size: 12px; color: var(--sage); }
-  .history-empty { padding: 16px; font-size: 11px; color: #ccc; text-align: center; }
+
+  .style-option.highlighted { background: var(--cream); }
 
   /* FOOTER NOTE */
   .footnote {
@@ -411,6 +401,165 @@
     line-height: 1.7;
   }
   .footnote strong { color: #666; }
+
+  /* FAST REACT IMPORT PANEL */
+  .import-panel {
+    grid-column: 1 / -1;
+    background: var(--ink);
+    border: 1px solid #333;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+  .import-header {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .import-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .import-badge {
+    background: var(--gold);
+    color: var(--ink);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+  .import-title {
+    font-size: 13px;
+    color: var(--paper);
+    font-weight: 500;
+  }
+  .import-subtitle {
+    font-size: 10px;
+    color: #777;
+    margin-top: 2px;
+  }
+  .import-upload-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    background: transparent;
+    border: 1px solid #444;
+    border-radius: 1px;
+    color: #aaa;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .import-upload-btn:hover { border-color: var(--gold); color: var(--gold-light); }
+  .import-upload-btn.loaded { border-color: var(--sage); color: #7aaa7a; }
+  #fr-file-input { display: none; }
+
+  .import-body {
+    display: none;
+    padding: 0 20px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--cream);
+  }
+  .import-body.visible { display: block; }
+
+  .style-search-wrap {
+    position: relative;
+    margin-top: 14px;
+  }
+  .style-search-wrap input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    cursor: text;
+    caret-color: var(--ink);
+  }
+  .style-search-wrap input::placeholder { color: #999; }
+  .style-search-wrap input:focus { border-color: var(--gold); background: white; }
+
+  .style-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: white;
+    border: 1px solid var(--border);
+    border-top: none;
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+  }
+  .style-dropdown.open { display: block; }
+  .style-option {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .style-option:hover { background: var(--cream); }
+  .style-option:last-child { border-bottom: none; }
+  .style-option .so-code { font-size: 13px; color: var(--gold); font-weight: 500; }
+  .style-option .so-desc { font-size: 10px; color: #666; margin-top: 2px; }
+  .style-option .so-meta { font-size: 10px; color: #aaa; margin-top: 1px; }
+
+  .import-stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .import-stat {
+    font-size: 10px;
+    color: #888;
+    letter-spacing: 0.06em;
+  }
+  .import-stat strong { color: var(--gold); }
+
+  .autofill-banner {
+    display: none;
+    margin-top: 0;
+    padding: 10px 16px;
+    background: #0d1a0f;
+    border: 1px solid #1a3a1f;
+    border-radius: 1px;
+    font-size: 11px;
+    color: #7aaa7a;
+    align-items: center;
+    gap: 8px;
+  }
+  .autofill-banner.visible { display: flex; }
+  .autofill-banner .af-style { color: var(--gold-light); font-weight: 500; }
+
+  /* AUTO-FILLED field highlight */
+  .field-autofilled select,
+  .field-autofilled input {
+    border-color: var(--sage) !important;
+    background: #f0f5f1 !important;
+  }
+  .field-autofilled label::after {
+    content: ' ✓ auto-filled';
+    color: var(--sage);
+    font-size: 9px;
+    margin-left: 6px;
+  }
 
   @media (max-width: 750px) {
     .container { grid-template-columns: 1fr; padding: 20px 16px; }
@@ -435,6 +584,38 @@
 </header>
 
 <div class="container">
+
+  <!-- FAST REACT IMPORT PANEL -->
+  <div class="import-panel">
+    <div class="import-header">
+      <div class="import-header-left">
+        <span class="import-badge">Fast React</span>
+        <div>
+          <div class="import-title">Import Orders from Fast React (Coats Digital)</div>
+          <div class="import-subtitle">Upload your Excel export — select a Style to auto-fill all classification fields</div>
+        </div>
+      </div>
+      <button class="import-upload-btn" id="upload-btn" onclick="document.getElementById('fr-file-input').click()">
+        ↑ Upload Excel Export
+      </button>
+      <input type="file" id="fr-file-input" accept=".xlsx,.xls" onchange="handleFileUpload(this)">
+    </div>
+    <div class="import-body" id="import-body">
+      <div class="import-stats" id="import-stats"></div>
+      <div class="style-search-wrap">
+        <input type="text" id="style-search" placeholder="Type style code e.g. KLW0707A…" 
+          oninput="filterStyles(this.value)" 
+          onkeydown="handleStyleKey(event)"
+          autocomplete="off" spellcheck="false">
+        <div class="style-dropdown" id="style-dropdown"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTOFILL BANNER -->
+  <div class="autofill-banner" id="autofill-banner" style="grid-column:1/-1;margin-top:-20px">
+    ✓ Fields auto-filled from Fast React — Style <span class="af-style" id="af-style-code"></span>. You can still edit any field manually before searching.
+  </div>
 
   <!-- FORM -->
   <div>
@@ -492,7 +673,7 @@
               </optgroup>
             </select>
           </div>
-          <div class="field-hint">The fibre with the greatest weight determines classification. Declare exact % on C88.</div>
+          <div class="field-hint" id="fibre-hint">The fibre with the greatest weight determines classification. Declare exact % on C88.</div>
         </div>
       </div>
     </div>
@@ -671,16 +852,6 @@
         </div>
       </div>
     </div>
-
-    <div class="history-panel">
-      <div class="history-header">
-        <span>Recent Lookups</span>
-        <button class="history-clear" onclick="clearHistory()">Clear</button>
-      </div>
-      <div id="history-list">
-        <div class="history-empty">No lookups yet</div>
-      </div>
-    </div>
   </div>
 
   <!-- FOOTNOTE -->
@@ -690,6 +861,467 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ─── FAST REACT INTEGRATION ───────────────────────────────
+let frStyles = [];      // all unique styles from uploaded file
+let frRows = [];        // all data rows
+let filteredStyles = [];
+
+// ── COLUMN INDICES (0-based) from Fast React export ──
+const COL = {
+  PO_NO:        0,   // A - PO No
+  CUST_DEPT:    6,   // G - Cust Dept
+  STYLE:        7,   // H - Style
+  STYLE_DESC:   8,   // I - Style Description
+  COLOUR:       9,   // J - Colour
+  ITEM:         10,  // K - Item (garment type: Knitwear, Jerseywear…)
+  FABRIC_YARN:  12,  // M - Fabric Yarn (fallback composition)
+  COMPOSITION:  13,  // N - Composition (primary)
+  GAUGE:        14,  // O - Gauge
+  COUNTRY:      16,  // Q - Country of Origin
+  SEASON:       3,   // D - Season & Year
+  CUSTOMER:     5,   // F - Customer Name
+};
+
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+      processUpload(data, file.name);
+    } catch(err) {
+      alert('Could not read file. Please ensure it is a valid Fast React Excel export (.xlsx).');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function processUpload(data, filename) {
+  if (data.length < 2) { alert('No data rows found in file.'); return; }
+
+  frRows = data.slice(1).filter(r => r && r[COL.STYLE]);
+
+  // Build unique styles (by Style code, take first occurrence)
+  const seen = new Set();
+  frStyles = [];
+  frRows.forEach(row => {
+    const styleCode = String(row[COL.STYLE] || '').trim();
+    if (styleCode && !seen.has(styleCode)) {
+      seen.add(styleCode);
+      frStyles.push({
+        code:        styleCode,
+        desc:        String(row[COL.STYLE_DESC] || '').trim(),
+        item:        String(row[COL.ITEM] || '').trim(),
+        custDept:    String(row[COL.CUST_DEPT] || '').trim(),
+        composition: String(row[COL.COMPOSITION] || '').trim(),
+        yarn:        String(row[COL.FABRIC_YARN] || '').trim(),
+        country:     String(row[COL.COUNTRY] || '').trim(),
+        season:      String(row[COL.SEASON] || '').trim(),
+        customer:    String(row[COL.CUSTOMER] || '').trim(),
+        colour:      String(row[COL.COLOUR] || '').trim(),
+        gauge:       String(row[COL.GAUGE] || '').trim(),
+      });
+    }
+  });
+
+  filteredStyles = [...frStyles];
+
+  // Update UI
+  document.getElementById('import-body').classList.add('visible');
+  document.getElementById('upload-btn').classList.add('loaded');
+  document.getElementById('upload-btn').textContent = '✓ ' + filename;
+  document.getElementById('import-stats').innerHTML =
+    `<span class="import-stat"><strong>${frStyles.length}</strong> unique styles loaded</span>
+     <span class="import-stat"><strong>${frRows.length}</strong> order lines</span>
+     <span class="import-stat">Season: <strong>${[...new Set(frStyles.map(s=>s.season))].join(', ')}</strong></span>`;
+
+  renderDropdown(filteredStyles);
+}
+
+function filterStyles(q) {
+  q = (q || '').trim();
+  if (!q) {
+    filteredStyles = [];
+    document.getElementById('style-dropdown').classList.remove('open');
+    return;
+  }
+  const ql = q.toLowerCase();
+  filteredStyles = frStyles.filter(s =>
+    s.code.toLowerCase().includes(ql) ||
+    s.desc.toLowerCase().includes(ql) ||
+    s.item.toLowerCase().includes(ql) ||
+    s.customer.toLowerCase().includes(ql)
+  );
+  renderDropdown(filteredStyles);
+  document.getElementById('style-dropdown').classList.add('open');
+}
+
+function handleStyleKey(e) {
+  const dd = document.getElementById('style-dropdown');
+  const items = dd.querySelectorAll('.style-option[data-code]');
+
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    // If exactly one match, auto-select it
+    if (filteredStyles.length === 1) {
+      selectStyle(filteredStyles[0].code);
+      return;
+    }
+    // If highlighted item exists, select it
+    const highlighted = dd.querySelector('.style-option.highlighted');
+    if (highlighted) { selectStyle(highlighted.dataset.code); return; }
+    // If multiple matches, just close dropdown and wait
+    dd.classList.remove('open');
+    return;
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    moveHighlight(items, 1);
+  }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    moveHighlight(items, -1);
+  }
+  if (e.key === 'Escape') {
+    dd.classList.remove('open');
+  }
+}
+
+function moveHighlight(items, dir) {
+  if (!items.length) return;
+  let idx = -1;
+  items.forEach((item, i) => { if (item.classList.contains('highlighted')) idx = i; });
+  if (idx >= 0) items[idx].classList.remove('highlighted');
+  idx = Math.max(0, Math.min(items.length - 1, idx + dir));
+  items[idx].classList.add('highlighted');
+  items[idx].scrollIntoView({ block: 'nearest' });
+}
+
+function renderDropdown(styles) {
+  const dd = document.getElementById('style-dropdown');
+  if (!styles.length) {
+    dd.innerHTML = '<div class="style-option"><span class="so-desc">No styles match — try a different code</span></div>';
+    return;
+  }
+  dd.innerHTML = styles.slice(0, 100).map(s => `
+    <div class="style-option" data-code="${s.code.replace(/"/g,'&quot;')}" onclick="selectStyle('${s.code.replace(/'/g,"\\'")}')">
+      <div class="so-code">${s.code}</div>
+      <div class="so-desc">${s.desc || '—'} · ${s.item || '—'}</div>
+      <div class="so-meta">${s.customer} · ${s.country} · ${s.season}</div>
+    </div>`).join('');
+  if (styles.length > 100) {
+    dd.innerHTML += `<div class="style-option"><span class="so-desc" style="color:#aaa">+${styles.length - 100} more — keep typing to narrow down</span></div>`;
+  }
+}
+
+function showDropdown() {
+  if (frStyles.length && document.getElementById('style-search').value.trim()) {
+    document.getElementById('style-dropdown').classList.add('open');
+  }
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.style-search-wrap')) {
+    document.getElementById('style-dropdown').classList.remove('open');
+  }
+});
+
+function selectStyle(styleCode) {
+  const style = frStyles.find(s => s.code === styleCode);
+  if (!style) return;
+
+  document.getElementById('style-search').value = `${style.code}  —  ${style.desc}`;
+  document.getElementById('style-dropdown').classList.remove('open');
+
+  // ── MAP TO FORM FIELDS ──────────────────────────────────
+
+  // 1. CONSTRUCTION METHOD
+  const construction = inferConstruction(style.item, style.composition, style.gauge);
+  setSelect('construction', construction, true);
+
+  // 2. FIBRE COMPOSITION — try composition first, fallback to yarn name
+  let fibre = inferFibre(style.composition);
+  if (!fibre) fibre = inferFibreFromYarn(style.yarn);
+  setSelect('fibre', fibre, true);
+  // Reset fibre hint text
+  const fibreHint = document.getElementById('fibre-hint');
+  if (fibreHint) {
+    fibreHint.textContent = 'The fibre with the greatest weight determines classification. Declare exact % on C88.';
+    fibreHint.style.color = '';
+  }
+
+  // 3. GARMENT TYPE
+  const garment = inferGarmentType(style.item, style.desc, style.custDept);
+  setSelect('garment', garment, true);
+
+  // 4. GENDER / AGE
+  const gender = inferGender(style.custDept);
+  setGenderChip(gender);
+
+  // 5. COUNTRY OF ORIGIN
+  const origin = inferCountry(style.country);
+  setSelect('origin', origin, true);
+
+  // Show autofill banner
+  document.getElementById('af-style-code').textContent = style.code;
+  document.getElementById('autofill-banner').classList.add('visible');
+
+  // Scroll to form
+  document.getElementById('construction').closest('.form-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── INFERENCE FUNCTIONS ─────────────────────────────────
+
+function inferConstruction(item, composition, gauge) {
+  const i = (item || '').toLowerCase();
+  // Item field is reliable for this dataset — only 4 values
+  if (i === 'knitwear') return 'knitted';
+  if (i === 'jerseywear') return 'knitted';
+  if (i === 'sleepwear') return 'knitted'; // all sleepwear in this dataset is jersey/knit
+  if (i === 'outerwear') {
+    // Outerwear can be knitted or woven — check composition/yarn for clues
+    const c = (composition || '').toLowerCase();
+    if (c.includes('denim') || c.includes('poplin') || c.includes('twill') || c.includes('woven')) return 'woven';
+    return 'knitted'; // majority of outerwear in range is knitted jersey/fleece
+  }
+  if (gauge && String(gauge).trim()) return 'knitted';
+  return 'knitted';
+}
+
+function inferFibre(composition) {
+  if (!composition) return '';
+  let c = composition.trim();
+
+  // Strip leading labels: "Resultant:", "TBC", etc.
+  c = c.replace(/^resultant\s*:/i, '').trim();
+  if (c.toLowerCase() === 'tbc' || c.toLowerCase() === 'n/a' || c === '') return '';
+
+  // Handle "+ separator" e.g. "89 FSC VISCOSE 11 NYLON + 100 NYLON"
+  // Split on " + " and take the first part (main fabric)
+  const parts = c.split(/\s*\+\s*/);
+  c = parts[0].trim();
+
+  // Strip certification labels: FSC, BCI, Recycled, ECO TANG, etc.
+  c = c.replace(/\b(FSC|BCI|GRS|GOTS|ECO\s*TANG?|RECYCLED|ORGANIC|SUSTAINABLE)\b/gi, '').trim();
+
+  const cl = c.toLowerCase();
+
+  // Try percentage-based matching first
+  // Formats: "89 VISCOSE 11 NYLON", "89%Viscose", "89 % viscose"
+  const matches = [...cl.matchAll(/(\d+(?:\.\d+)?)\s*%?\s*(viscose|modal|lyocell|bamboo|cupro|tencel|polyester|nylon|acrylic|elastane|spandex|polypropylene|cotton|wool|cashmere|silk|linen|flax|hemp|angora|alpaca|mohair)/g)];
+
+  if (matches.length > 0) {
+    const dominant = matches.reduce((a, b) => parseFloat(a[1]) >= parseFloat(b[1]) ? a : b);
+    return fibreToCode(dominant[2]);
+  }
+
+  // No percentages — keyword search
+  if (cl.includes('wool') || cl.includes('cashmere') || cl.includes('alpaca') || cl.includes('mohair') || cl.includes('angora')) return 'wool';
+  if (cl.includes('cotton')) return 'cotton';
+  if (cl.includes('viscose') || cl.includes('modal') || cl.includes('lyocell') || cl.includes('tencel') || cl.includes('bamboo') || cl.includes('cupro')) return 'mmf_artif';
+  if (cl.includes('polyester') || cl.includes('nylon') || cl.includes('acrylic') || cl.includes('polypropylene')) return 'mmf_synth';
+  if (cl.includes('silk')) return 'silk';
+  if (cl.includes('linen') || cl.includes('flax')) return 'linen';
+
+  // Try parsing yarn name for fibre hints (e.g. "Winnie 89 FSC", "Webster 32 Recycled 8 Wool")
+  return '';
+}
+
+function inferFibreFromYarn(yarn) {
+  if (!yarn) return '';
+  const y = yarn.toLowerCase();
+
+  // Strip certification/process labels before parsing
+  const cleaned = y.replace(/\b(fsc|bci|grs|gots|eco\s*tang?|recycled|organic|sustainable|lug|soi|hua|hwa|f)\b/g, '').trim();
+
+  // Try percentage-based matching on cleaned yarn name
+  const matches = [...cleaned.matchAll(/(\d+)\s*%?\s*(viscose|modal|lyocell|polyester|nylon|acrylic|cotton|wool|cashmere|silk|linen|angora|alpaca|mohair)/g)];
+  if (matches.length > 0) {
+    const dominant = matches.reduce((a, b) => parseInt(a[1]) >= parseInt(b[1]) ? a : b);
+    return fibreToCode(dominant[2]);
+  }
+
+  // Keyword fallback — only if a clear fibre word is present
+  if (cleaned.includes('wool') || cleaned.includes('cashmere') || cleaned.includes('alpaca') || cleaned.includes('mohair')) return 'wool';
+  if (cleaned.includes('cotton')) return 'cotton';
+  if (cleaned.includes('viscose') || cleaned.includes('modal') || cleaned.includes('lyocell') || cleaned.includes('tencel')) return 'mmf_artif';
+  if (cleaned.includes('polyester') || cleaned.includes('nylon') || cleaned.includes('acrylic')) return 'mmf_synth';
+  if (cleaned.includes('silk')) return 'silk';
+  if (cleaned.includes('linen') || cleaned.includes('flax')) return 'linen';
+
+  // Cannot determine fibre from yarn name alone — return blank so user selects manually
+  return '';
+}
+
+function fibreToCode(name) {
+  const map = {
+    viscose:'mmf_artif', modal:'mmf_artif', lyocell:'mmf_artif', bamboo:'mmf_artif', cupro:'mmf_artif', tencel:'mmf_artif',
+    polyester:'mmf_synth', nylon:'mmf_synth', acrylic:'mmf_synth', elastane:'mmf_synth', spandex:'mmf_synth', polypropylene:'mmf_synth',
+    cotton:'cotton', wool:'wool', cashmere:'wool', silk:'silk', linen:'linen', flax:'linen',
+    hemp:'other_veg', angora:'wool', alpaca:'wool', mohair:'wool',
+  };
+  return map[name] || '';
+}
+
+function inferGarmentType(item, desc, custDept) {
+  const i = (item || '').toLowerCase().trim();
+  const d = (desc || '').toLowerCase();
+  const cd = (custDept || '').toLowerCase();
+
+  // ── SLEEPWEAR item ──
+  if (i === 'sleepwear') {
+    if (d.includes('robe') || d.includes('gown')) return 'lounge_robe';
+    if (d.includes('set') || d.includes('pj') || d.includes('pyjama')) return 'lounge_set';
+    if (d.includes('dress') || d.includes('nightdress')) return 'nightwear';
+    if (d.includes('jogger') || d.includes('trouser') || d.includes('short') || d.includes('bottom') || d.includes('legging') || d.includes('crop')) return 'lounge_bottom';
+    if (d.includes('top') || d.includes('tee') || d.includes('shirt') || d.includes('vest')) return 'lounge_top';
+    return 'nightwear';
+  }
+
+  // ── OUTERWEAR item ──
+  if (i === 'outerwear') {
+    if (d.includes('gilet') || d.includes('body warmer') || d.includes('sleeveless')) return 'outerwear_gilet';
+    if (d.includes('jacket') || d.includes('blazer') || d.includes('shirt jacket')) return 'outerwear_jacket';
+    if (d.includes('fleece')) return 'outerwear_fleece';
+    if (d.includes('coat') || d.includes('mac') || d.includes('trench') || d.includes('cape') || d.includes('cloak')) return 'outerwear_coat';
+    return 'outerwear_jacket';
+  }
+
+  // ── KNITWEAR item ──
+  if (i === 'knitwear') {
+    if (d.includes('cardi')) return 'ladies_cardigan';
+    if (d.includes('jumper') || d.includes('sweater') || d.includes('crew') || d.includes('v neck') || d.includes('vneck') || d.includes('v-neck') || d.includes('cable') || d.includes('intarsia') || d.includes('fair isle')) return 'ladies_pullover';
+    if (d.includes('waistcoat') || d.includes('gilet')) return 'ladies_waistcoat';
+    if (d.includes('hoodie') || d.includes('zip through') || d.includes('zip-through') || d.includes('zip thru')) return 'ladies_hoodie';
+    if (d.includes('sweat') || d.includes('crew neck')) return 'jumper';
+    if (d.includes('twinset') || d.includes('twin set')) return 'ladies_twinset';
+    if (d.includes('dress')) return 'ladies_knit_dress';
+    if (d.includes('skirt')) return 'ladies_knit_skirt';
+    if (d.includes('coord') || d.includes('co-ord')) return 'ladies_knit_coord';
+    if (d.includes('polo')) return 'jersey';
+    if (d.includes('tank') || d.includes('vest') || d.includes('sleeveless') || d.includes('camisole')) return 'ladies_waistcoat';
+    if (d.includes('top') || d.includes('tee') || d.includes('long sleeve') || d.includes('ls ') || d.includes('ribbed') || d.includes('rib ')) return 'ladies_longsleeve_top';
+    if (d.includes('trouser') || d.includes('jogger') || d.includes('short') || d.includes('legging')) return 'trousers';
+    if (d.includes('set') || d.includes('lounge')) return 'ladies_knit_coord';
+    // Gender-based default
+    if (cd.includes('ladies') || cd.includes('womens')) return 'ladies_pullover';
+    if (cd.includes('mens') || cd.includes("men's")) return 'jumper';
+    if (cd.includes('girls') || cd.includes('toddler')) return 'ladies_pullover';
+    return 'ladies_pullover';
+  }
+
+  // ── JERSEYWEAR item ──
+  if (i === 'jerseywear') {
+    if (d.includes('dress')) return 'jersey_dress';
+    if (d.includes('skirt')) return 'jersey_skirt';
+    if (d.includes('trouser') || d.includes('jogger') || d.includes('legging') || d.includes('short') || d.includes('crop') || d.includes('wide leg') || d.includes('straight leg')) return 'jersey_trousers';
+    if (d.includes('coord') || d.includes('co-ord') || d.includes('set') || d.includes('suit')) return 'jersey_coord';
+    if (d.includes('playsuit') || d.includes('bodysuit') || d.includes('jumpsuit')) return 'jumpsuit';
+    if (d.includes('hoodie') || d.includes('sweat') || d.includes('zip')) return 'ladies_hoodie';
+    if (d.includes('cardi')) return 'ladies_cardigan';
+    // Default jersey top
+    return 'jersey_top';
+  }
+
+  return '';
+}
+
+function inferGender(custDept) {
+  const cd = (custDept || '').toLowerCase();
+  // Specific age/gender patterns first
+  if (cd.includes('toddler girls') || cd.includes('toddler girl')) return 'girls';
+  if (cd.includes('older girls') || cd.includes('older girl')) return 'girls';
+  if (cd.includes('girls')) return 'girls';
+  if (cd.includes('boys')) return 'boys';
+  if (cd.includes('baby') || cd.includes('infant') || cd.includes('newborn') || cd.includes('toddler')) return 'infant';
+  if (cd.includes('mens') || cd.includes("men's") || cd.includes(' men ') || cd.startsWith('men')) return 'mens';
+  // Ladies is dominant in this dataset
+  if (cd.includes('ladies') || cd.includes('womens') || cd.includes("women's") || cd.includes('savida')) return 'womens';
+  return 'womens';
+}
+
+function inferCountry(country) {
+  if (!country) return '';
+  const c = country.toLowerCase().trim();
+  const map = {
+    'bangladesh':'bangladesh', 'cambodia':'cambodia', 'myanmar':'myanmar',
+    'vietnam':'vietnam', 'viet nam':'vietnam',
+    'turkey':'turkey', 'türkiye':'turkey',
+    'china':'china', 'china p.r.':'china',
+    'india':'india', 'pakistan':'pakistan',
+    'morocco':'morocco', 'egypt':'egypt',
+    'indonesia':'indonesia', 'sri lanka':'sri_lanka',
+    'ethiopia':'ethiopia', 'hong kong':'hong_kong',
+    'south korea':'south_korea', 'korea':'south_korea',
+    'usa':'usa', 'united states':'usa',
+    'taiwan':'taiwan', 'thailand':'thailand', 'malaysia':'malaysia',
+  };
+  return map[c] || 'other_standard';
+}
+
+// ── FORM HELPERS ─────────────────────────────────────────
+
+function setSelect(id, value, highlight) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const fg = el.closest('.field-group');
+  const lbl = fg?.querySelector('label');
+  // Clear any previous warning state
+  fg?.querySelector('.manual-warning')?.remove();
+  fg?.classList.remove('field-autofilled', 'field-needs-manual');
+
+  if (value) {
+    const exists = [...el.options].some(o => o.value === value);
+    if (exists) {
+      el.value = value;
+      if (highlight) fg?.classList.add('field-autofilled');
+      return;
+    }
+  }
+  // Cannot populate — Option C: pulsing badge on label + red border
+  el.value = '';
+  fg?.classList.add('field-needs-manual');
+  if (lbl) {
+    const badge = document.createElement('span');
+    badge.className = 'manual-warning';
+    badge.textContent = '! Select manually';
+    lbl.appendChild(badge);
+  }
+}
+
+function setGenderChip(value) {
+  genderChips.forEach(c => c.classList.remove('active'));
+  const genderFg = document.querySelector('#gender-chips')?.closest('.field-group');
+  const lbl = genderFg?.querySelector('label');
+  // Clear previous warning
+  genderFg?.querySelector('.manual-warning')?.remove();
+  genderFg?.classList.remove('field-needs-manual');
+
+  if (value) {
+    const chip = document.querySelector(`#gender-chips .chip[data-val="${value}"]`);
+    if (chip) {
+      chip.classList.add('active');
+      selectedGender = value;
+      return;
+    }
+  }
+  // Cannot determine — Option C badge on label
+  selectedGender = null;
+  genderFg?.classList.add('field-needs-manual');
+  if (lbl) {
+    const badge = document.createElement('span');
+    badge.className = 'manual-warning';
+    badge.textContent = '! Select manually';
+    lbl.appendChild(badge);
+  }
+}
+
+</script>
 <script>
 // ─── CHIP SELECTION ───────────────────────────────────────
 const genderChips = document.querySelectorAll('#gender-chips .chip');
@@ -1376,28 +2008,21 @@ function resetForm() {
   selectedSpecial.clear();
   document.getElementById('result-status').textContent = '—';
   document.getElementById('result-body').innerHTML = `<div class="result-empty"><div class="icon">⬡</div><p>Complete the form and click<br><strong>Find Commodity Code</strong><br>to see your result.</p></div>`;
-}
-
-function renderHistory() {
-  const el = document.getElementById('history-list');
-  if (!lookupHistory.length) {
-    el.innerHTML = '<div class="history-empty">No lookups yet</div>';
-    return;
+  document.querySelectorAll('.field-autofilled, .field-needs-manual').forEach(el => {
+    el.classList.remove('field-autofilled', 'field-needs-manual');
+  });
+  document.querySelectorAll('.manual-warning').forEach(el => el.remove());
+  document.getElementById('autofill-banner').classList.remove('visible');
+  const fibreHint = document.getElementById('fibre-hint');
+  if (fibreHint) { fibreHint.style.color = ''; fibreHint.textContent = 'The fibre with the greatest weight determines classification. Declare exact % on C88.'; }
+  if (document.getElementById('style-search')) {
+    document.getElementById('style-search').value = '';
+    document.getElementById('style-dropdown').classList.remove('open');
   }
-  el.innerHTML = lookupHistory.map((h, i) => `
-    <div class="history-item">
-      <div>
-        <div class="h-code">${h.code}</div>
-        <div class="h-desc">${h.desc} · ${h.origin}</div>
-      </div>
-      <div class="h-duty">${h.duty}</div>
-    </div>`).join('');
 }
 
-function clearHistory() {
-  lookupHistory = [];
-  renderHistory();
-}
+function renderHistory() {}
+function clearHistory() {}
 </script>
 </body>
 </html>
