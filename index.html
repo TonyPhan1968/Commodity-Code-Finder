@@ -468,7 +468,7 @@
 
   .import-body {
     display: none;
-    padding: 0 20px 16px;
+    padding: 0 20px 220px;
     border-top: 1px solid var(--border);
     background: var(--cream);
   }
@@ -969,10 +969,13 @@ function handleStyleKey(e) {
 
   if (e.key === 'Enter') {
     e.preventDefault();
-    if (filteredStyles.length === 1) {
-      selectStyle(filteredStyles[0].code);
-      return;
-    }
+    const q = document.getElementById('style-search').value.trim();
+    // First check for exact match on the typed code (case insensitive)
+    const exact = frStyles.find(s => s.code.toLowerCase() === q.toLowerCase());
+    if (exact) { selectStyle(exact.code); return; }
+    // Then if only one result in filtered list, select it
+    if (filteredStyles.length === 1) { selectStyle(filteredStyles[0].code); return; }
+    // Then check highlighted item
     const highlighted = dd.querySelector('.style-option.highlighted');
     if (highlighted) { selectStyle(highlighted.dataset.code); return; }
     // If only one visible option in dropdown, select it
