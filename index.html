@@ -502,14 +502,14 @@
     background: white;
     border: 1px solid var(--border);
     border-top: none;
-    max-height: 260px;
+    max-height: 420px;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 9999;
     display: none;
   }
   .style-dropdown.open { display: block; }
   .style-option {
-    padding: 10px 14px;
+    padding: 8px 14px;
     cursor: pointer;
     border-bottom: 1px solid var(--border);
     transition: background 0.1s;
@@ -604,8 +604,10 @@
       <div class="import-stats" id="import-stats"></div>
       <div class="style-search-wrap">
         <input type="text" id="style-search" placeholder="Type style code e.g. KLW0707A…" 
-          oninput="filterStyles(this.value)" 
+          oninput="filterStyles(this.value)"
+          onkeyup="filterStyles(this.value)"
           onkeydown="handleStyleKey(event)"
+          onfocus="if(this.value.trim()) filterStyles(this.value)"
           autocomplete="off" spellcheck="false">
         <div class="style-dropdown" id="style-dropdown"></div>
       </div>
@@ -967,15 +969,15 @@ function handleStyleKey(e) {
 
   if (e.key === 'Enter') {
     e.preventDefault();
-    // If exactly one match, auto-select it
     if (filteredStyles.length === 1) {
       selectStyle(filteredStyles[0].code);
       return;
     }
-    // If highlighted item exists, select it
     const highlighted = dd.querySelector('.style-option.highlighted');
     if (highlighted) { selectStyle(highlighted.dataset.code); return; }
-    // If multiple matches, just close dropdown and wait
+    // If only one visible option in dropdown, select it
+    const options = dd.querySelectorAll('.style-option[data-code]');
+    if (options.length === 1) { selectStyle(options[0].dataset.code); return; }
     dd.classList.remove('open');
     return;
   }
@@ -1032,7 +1034,7 @@ document.addEventListener('click', e => {
 });
 
 function selectStyle(styleCode) {
-  const style = frStyles.find(s => s.code === styleCode);
+  const style = frStyles.find(s => s.code.toLowerCase() === styleCode.toLowerCase());
   if (!style) return;
 
   document.getElementById('style-search').value = `${style.code}  —  ${style.desc}`;
@@ -1078,84 +1080,67 @@ function selectStyle(styleCode) {
 // ── INFERENCE FUNCTIONS ─────────────────────────────────
 
 function inferConstruction(item, composition, gauge) {
-  const i = (item || '').toLowerCase();
-  // Item field is reliable for this dataset — only 4 values
+  const i = (item || '').toLowerCase().trim();
   if (i === 'knitwear') return 'knitted';
   if (i === 'jerseywear') return 'knitted';
-  if (i === 'sleepwear') return 'knitted'; // all sleepwear in this dataset is jersey/knit
+  if (i === 'sleepwear') return 'knitted';
   if (i === 'outerwear') {
-    // Outerwear can be knitted or woven — check composition/yarn for clues
     const c = (composition || '').toLowerCase();
-    if (c.includes('denim') || c.includes('poplin') || c.includes('twill') || c.includes('woven')) return 'woven';
-    return 'knitted'; // majority of outerwear in range is knitted jersey/fleece
+    if (c.includes('denim') || c.includes('poplin') || c.includes('twill') || c.includes('woven') || c.includes('satin') || c.includes('chiffon')) return 'woven';
+    if (c.includes('fleece') || c.includes('jersey') || c.includes('knit')) return 'knitted';
+    if (gauge && String(gauge).trim()) return 'knitted';
+    return ''; // cannot determine — flag
   }
   if (gauge && String(gauge).trim()) return 'knitted';
-  return 'knitted';
+  return ''; // unknown item — flag
 }
 
 function inferFibre(composition) {
   if (!composition) return '';
   let c = composition.trim();
-
-  // Strip leading labels: "Resultant:", "TBC", etc.
   c = c.replace(/^resultant\s*:/i, '').trim();
   if (c.toLowerCase() === 'tbc' || c.toLowerCase() === 'n/a' || c === '') return '';
-
-  // Handle "+ separator" e.g. "89 FSC VISCOSE 11 NYLON + 100 NYLON"
-  // Split on " + " and take the first part (main fabric)
   const parts = c.split(/\s*\+\s*/);
   c = parts[0].trim();
-
-  // Strip certification labels: FSC, BCI, Recycled, ECO TANG, etc.
   c = c.replace(/\b(FSC|BCI|GRS|GOTS|ECO\s*TANG?|RECYCLED|ORGANIC|SUSTAINABLE)\b/gi, '').trim();
-
   const cl = c.toLowerCase();
-
-  // Try percentage-based matching first
-  // Formats: "89 VISCOSE 11 NYLON", "89%Viscose", "89 % viscose"
   const matches = [...cl.matchAll(/(\d+(?:\.\d+)?)\s*%?\s*(viscose|modal|lyocell|bamboo|cupro|tencel|polyester|nylon|acrylic|elastane|spandex|polypropylene|cotton|wool|cashmere|silk|linen|flax|hemp|angora|alpaca|mohair)/g)];
-
   if (matches.length > 0) {
     const dominant = matches.reduce((a, b) => parseFloat(a[1]) >= parseFloat(b[1]) ? a : b);
-    return fibreToCode(dominant[2]);
+    // Only auto-fill if dominant fibre is clearly ≥50%
+    if (parseFloat(dominant[1]) >= 50) return fibreToCode(dominant[2]);
+    return ''; // no single fibre ≥50% — flag
   }
-
-  // No percentages — keyword search
-  if (cl.includes('wool') || cl.includes('cashmere') || cl.includes('alpaca') || cl.includes('mohair') || cl.includes('angora')) return 'wool';
-  if (cl.includes('cotton')) return 'cotton';
-  if (cl.includes('viscose') || cl.includes('modal') || cl.includes('lyocell') || cl.includes('tencel') || cl.includes('bamboo') || cl.includes('cupro')) return 'mmf_artif';
-  if (cl.includes('polyester') || cl.includes('nylon') || cl.includes('acrylic') || cl.includes('polypropylene')) return 'mmf_synth';
-  if (cl.includes('silk')) return 'silk';
-  if (cl.includes('linen') || cl.includes('flax')) return 'linen';
-
-  // Try parsing yarn name for fibre hints (e.g. "Winnie 89 FSC", "Webster 32 Recycled 8 Wool")
-  return '';
+  // No percentages — only return if exactly one fibre type present (unambiguous)
+  const fibres = [];
+  if (cl.includes('wool') || cl.includes('cashmere') || cl.includes('alpaca') || cl.includes('mohair') || cl.includes('angora')) fibres.push('wool');
+  if (cl.includes('cotton')) fibres.push('cotton');
+  if (cl.includes('viscose') || cl.includes('modal') || cl.includes('lyocell') || cl.includes('tencel') || cl.includes('bamboo') || cl.includes('cupro')) fibres.push('mmf_artif');
+  if (cl.includes('polyester') || cl.includes('nylon') || cl.includes('acrylic') || cl.includes('polypropylene')) fibres.push('mmf_synth');
+  if (cl.includes('silk')) fibres.push('silk');
+  if (cl.includes('linen') || cl.includes('flax')) fibres.push('linen');
+  if (fibres.length === 1) return fibres[0];
+  return ''; // ambiguous or unknown — flag
 }
 
 function inferFibreFromYarn(yarn) {
   if (!yarn) return '';
-  const y = yarn.toLowerCase();
-
-  // Strip certification/process labels before parsing
-  const cleaned = y.replace(/\b(fsc|bci|grs|gots|eco\s*tang?|recycled|organic|sustainable|lug|soi|hua|hwa|f)\b/g, '').trim();
-
-  // Try percentage-based matching on cleaned yarn name
+  const cleaned = yarn.toLowerCase().replace(/\b(fsc|bci|grs|gots|eco\s*tang?|recycled|organic|sustainable|lug|soi|hua|hwa|f)\b/g, '').trim();
   const matches = [...cleaned.matchAll(/(\d+)\s*%?\s*(viscose|modal|lyocell|polyester|nylon|acrylic|cotton|wool|cashmere|silk|linen|angora|alpaca|mohair)/g)];
   if (matches.length > 0) {
     const dominant = matches.reduce((a, b) => parseInt(a[1]) >= parseInt(b[1]) ? a : b);
-    return fibreToCode(dominant[2]);
+    if (parseInt(dominant[1]) >= 50) return fibreToCode(dominant[2]);
+    return '';
   }
-
-  // Keyword fallback — only if a clear fibre word is present
-  if (cleaned.includes('wool') || cleaned.includes('cashmere') || cleaned.includes('alpaca') || cleaned.includes('mohair')) return 'wool';
-  if (cleaned.includes('cotton')) return 'cotton';
-  if (cleaned.includes('viscose') || cleaned.includes('modal') || cleaned.includes('lyocell') || cleaned.includes('tencel')) return 'mmf_artif';
-  if (cleaned.includes('polyester') || cleaned.includes('nylon') || cleaned.includes('acrylic')) return 'mmf_synth';
-  if (cleaned.includes('silk')) return 'silk';
-  if (cleaned.includes('linen') || cleaned.includes('flax')) return 'linen';
-
-  // Cannot determine fibre from yarn name alone — return blank so user selects manually
-  return '';
+  const fibres = [];
+  if (cleaned.includes('wool') || cleaned.includes('cashmere') || cleaned.includes('alpaca') || cleaned.includes('mohair')) fibres.push('wool');
+  if (cleaned.includes('cotton')) fibres.push('cotton');
+  if (cleaned.includes('viscose') || cleaned.includes('modal') || cleaned.includes('lyocell') || cleaned.includes('tencel')) fibres.push('mmf_artif');
+  if (cleaned.includes('polyester') || cleaned.includes('nylon') || cleaned.includes('acrylic')) fibres.push('mmf_synth');
+  if (cleaned.includes('silk')) fibres.push('silk');
+  if (cleaned.includes('linen') || cleaned.includes('flax')) fibres.push('linen');
+  if (fibres.length === 1) return fibres[0];
+  return ''; // cannot determine — flag
 }
 
 function fibreToCode(name) {
@@ -1171,78 +1156,72 @@ function fibreToCode(name) {
 function inferGarmentType(item, desc, custDept) {
   const i = (item || '').toLowerCase().trim();
   const d = (desc || '').toLowerCase();
-  const cd = (custDept || '').toLowerCase();
 
-  // ── SLEEPWEAR item ──
   if (i === 'sleepwear') {
     if (d.includes('robe') || d.includes('gown')) return 'lounge_robe';
-    if (d.includes('set') || d.includes('pj') || d.includes('pyjama')) return 'lounge_set';
-    if (d.includes('dress') || d.includes('nightdress')) return 'nightwear';
-    if (d.includes('jogger') || d.includes('trouser') || d.includes('short') || d.includes('bottom') || d.includes('legging') || d.includes('crop')) return 'lounge_bottom';
-    if (d.includes('top') || d.includes('tee') || d.includes('shirt') || d.includes('vest')) return 'lounge_top';
-    return 'nightwear';
+    if (d.includes('pj') || d.includes('pyjama')) return 'lounge_set';
+    if (d.includes('nightdress') || d.includes('night dress')) return 'nightwear';
+    if (d.includes('jogger') || d.includes('trouser') || d.includes('short') || d.includes('bottom') || d.includes('legging') || d.includes('crop') || d.includes('wide leg')) return 'lounge_bottom';
+    if (d.includes('top') || d.includes('tee') || d.includes('shirt') || d.includes('vest') || d.includes('cami')) return 'lounge_top';
+    if (d.includes('dress')) return 'lounge_dress';
+    if (d.includes('set')) return 'lounge_set';
+    return ''; // cannot determine — flag
   }
 
-  // ── OUTERWEAR item ──
   if (i === 'outerwear') {
-    if (d.includes('gilet') || d.includes('body warmer') || d.includes('sleeveless')) return 'outerwear_gilet';
-    if (d.includes('jacket') || d.includes('blazer') || d.includes('shirt jacket')) return 'outerwear_jacket';
+    if (d.includes('gilet') || d.includes('body warmer')) return 'outerwear_gilet';
     if (d.includes('fleece')) return 'outerwear_fleece';
-    if (d.includes('coat') || d.includes('mac') || d.includes('trench') || d.includes('cape') || d.includes('cloak')) return 'outerwear_coat';
-    return 'outerwear_jacket';
+    if (d.includes('coat') || d.includes('mac') || d.includes('trench') || d.includes('cape') || d.includes('cloak') || d.includes('parka')) return 'outerwear_coat';
+    if (d.includes('jacket') || d.includes('blazer') || d.includes('bomber') || d.includes('anorak') || d.includes('zip') || d.includes('quilted')) return 'outerwear_jacket';
+    return ''; // cannot determine — flag
   }
 
-  // ── KNITWEAR item ──
   if (i === 'knitwear') {
     if (d.includes('cardi')) return 'ladies_cardigan';
-    if (d.includes('jumper') || d.includes('sweater') || d.includes('crew') || d.includes('v neck') || d.includes('vneck') || d.includes('v-neck') || d.includes('cable') || d.includes('intarsia') || d.includes('fair isle')) return 'ladies_pullover';
-    if (d.includes('waistcoat') || d.includes('gilet')) return 'ladies_waistcoat';
-    if (d.includes('hoodie') || d.includes('zip through') || d.includes('zip-through') || d.includes('zip thru')) return 'ladies_hoodie';
-    if (d.includes('sweat') || d.includes('crew neck')) return 'jumper';
     if (d.includes('twinset') || d.includes('twin set')) return 'ladies_twinset';
+    if (d.includes('hoodie') || d.includes('zip through') || d.includes('zip-through') || d.includes('zip thru')) return 'ladies_hoodie';
+    if (d.includes('waistcoat') || d.includes('gilet')) return 'ladies_waistcoat';
+    if (d.includes('tank') || d.includes('camisole') || d.includes('cami')) return 'ladies_camisole_knit';
+    if (d.includes('sleeveless') && !d.includes('dress')) return 'ladies_waistcoat';
+    if (d.includes('jumper') || d.includes('sweater') || d.includes('pullover') || d.includes('crew') || d.includes('v neck') || d.includes('vneck') || d.includes('v-neck') || d.includes('cable') || d.includes('intarsia') || d.includes('fair isle')) return 'ladies_pullover';
+    if (d.includes('sweat') || d.includes('sweatshirt')) return 'jumper';
     if (d.includes('dress')) return 'ladies_knit_dress';
     if (d.includes('skirt')) return 'ladies_knit_skirt';
     if (d.includes('coord') || d.includes('co-ord')) return 'ladies_knit_coord';
     if (d.includes('polo')) return 'jersey';
-    if (d.includes('tank') || d.includes('vest') || d.includes('sleeveless') || d.includes('camisole')) return 'ladies_waistcoat';
-    if (d.includes('top') || d.includes('tee') || d.includes('long sleeve') || d.includes('ls ') || d.includes('ribbed') || d.includes('rib ')) return 'ladies_longsleeve_top';
+    if (d.includes('top') || d.includes('tee') || d.includes('long sleeve') || d.includes('ls ') || d.includes('rib') || d.includes('wrap') || d.includes('blouse') || d.includes('vest')) return 'ladies_longsleeve_top';
     if (d.includes('trouser') || d.includes('jogger') || d.includes('short') || d.includes('legging')) return 'trousers';
     if (d.includes('set') || d.includes('lounge')) return 'ladies_knit_coord';
-    // Gender-based default
-    if (cd.includes('ladies') || cd.includes('womens')) return 'ladies_pullover';
-    if (cd.includes('mens') || cd.includes("men's")) return 'jumper';
-    if (cd.includes('girls') || cd.includes('toddler')) return 'ladies_pullover';
-    return 'ladies_pullover';
+    return ''; // cannot determine — flag
   }
 
-  // ── JERSEYWEAR item ──
   if (i === 'jerseywear') {
     if (d.includes('dress')) return 'jersey_dress';
     if (d.includes('skirt')) return 'jersey_skirt';
     if (d.includes('trouser') || d.includes('jogger') || d.includes('legging') || d.includes('short') || d.includes('crop') || d.includes('wide leg') || d.includes('straight leg')) return 'jersey_trousers';
-    if (d.includes('coord') || d.includes('co-ord') || d.includes('set') || d.includes('suit')) return 'jersey_coord';
+    if (d.includes('coord') || d.includes('co-ord')) return 'jersey_coord';
     if (d.includes('playsuit') || d.includes('bodysuit') || d.includes('jumpsuit')) return 'jumpsuit';
-    if (d.includes('hoodie') || d.includes('sweat') || d.includes('zip')) return 'ladies_hoodie';
+    if (d.includes('hoodie') || d.includes('zip through') || d.includes('zip-through') || d.includes('zip thru')) return 'ladies_hoodie';
     if (d.includes('cardi')) return 'ladies_cardigan';
-    // Default jersey top
-    return 'jersey_top';
+    if (d.includes('top') || d.includes('tee') || d.includes('shirt') || d.includes('vest') || d.includes('blouse') ||
+        d.includes('sweatshirt') || d.includes('sweater') || d.includes('jumper') || d.includes('pullover') ||
+        d.includes('tunic') || d.includes('tank') || d.includes('cami') || d.includes('wrap') || d.includes('set')) return 'jersey_top';
+    return ''; // cannot determine — flag
   }
 
-  return '';
+  return ''; // unknown item — flag
 }
 
 function inferGender(custDept) {
   const cd = (custDept || '').toLowerCase();
-  // Specific age/gender patterns first
   if (cd.includes('toddler girls') || cd.includes('toddler girl')) return 'girls';
   if (cd.includes('older girls') || cd.includes('older girl')) return 'girls';
   if (cd.includes('girls')) return 'girls';
   if (cd.includes('boys')) return 'boys';
   if (cd.includes('baby') || cd.includes('infant') || cd.includes('newborn') || cd.includes('toddler')) return 'infant';
   if (cd.includes('mens') || cd.includes("men's") || cd.includes(' men ') || cd.startsWith('men')) return 'mens';
-  // Ladies is dominant in this dataset
   if (cd.includes('ladies') || cd.includes('womens') || cd.includes("women's") || cd.includes('savida')) return 'womens';
-  return 'womens';
+  return ''; // cannot determine — flag
 }
 
 function inferCountry(country) {
