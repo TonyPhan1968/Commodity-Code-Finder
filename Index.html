@@ -504,7 +504,7 @@
     border-top: none;
     max-height: 260px;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 9999;
     display: none;
   }
   .style-dropdown.open { display: block; }
@@ -604,8 +604,10 @@
       <div class="import-stats" id="import-stats"></div>
       <div class="style-search-wrap">
         <input type="text" id="style-search" placeholder="Type style code e.g. KLW0707A…" 
-          oninput="filterStyles(this.value)" 
+          oninput="filterStyles(this.value)"
+          onkeyup="filterStyles(this.value)"
           onkeydown="handleStyleKey(event)"
+          onfocus="if(this.value.trim()) filterStyles(this.value)"
           autocomplete="off" spellcheck="false">
         <div class="style-dropdown" id="style-dropdown"></div>
       </div>
